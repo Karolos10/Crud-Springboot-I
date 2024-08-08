@@ -28,7 +28,7 @@ public class ProductService {
     public ResponseEntity<Object> newProduct(Product product) {
         Optional<Product> res = productRepository.findProductByName(product.getName());
         HashMap<String, Object> datos = new HashMap<>();
-        if(res.isPresent()){
+        if(res.isPresent() && product.getId()==null){
             datos.put("error", true);
             datos.put("message", "There is already a product with the same name");
             return new ResponseEntity<>(
@@ -37,9 +37,12 @@ public class ProductService {
             );
         }
 
+        datos.put("message", "The product has been stored correctly");
+        if(product.getId()!=null){
+            datos.put("message", "The product was update successfully");
+        }
         productRepository.save(product);
         datos.put("data",product);
-        datos.put("message", "The product has been stored correctly");
         return new ResponseEntity<>(
                 datos,
                 HttpStatus.CREATED

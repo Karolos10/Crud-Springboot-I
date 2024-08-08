@@ -1,10 +1,14 @@
 package com.example.crud.product;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,12 +25,24 @@ public class ProductService {
         return this.productRepository.findAll();
     }
 
-    public void newProduct(Product product) {
+    public ResponseEntity<Object> newProduct(Product product) {
         Optional<Product> res = productRepository.findProductByName(product.getName());
+        HashMap<String, Object> datos = new HashMap<>();
         if(res.isPresent()){
-            throw new IllegalStateException("The product already exists");
+            datos.put("error", true);
+            datos.put("message", "There is already a product with the same name");
+            return new ResponseEntity<>(
+                    datos,
+                    HttpStatus.CONFLICT
+            );
         }
 
         productRepository.save(product);
+        datos.put("data",product);
+        datos.put("message", "The product has been stored correctly");
+        return new ResponseEntity<>(
+                datos,
+                HttpStatus.CREATED
+        );
     }
 }
